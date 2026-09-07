@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>The Vox Relay — Brotherhood Codex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0c;
+      --bg-panel: #121216;
+      --bg-card: #1a1a20;
+      --bg-elevated: #22222a;
+      --gold: #c9a227;
+      --gold-dim: #8a7020;
+      --gold-bright: #e8c547;
+      --brass: #b87333;
+      --text-primary: #e8e4d9;
+      --text-secondary: #a39e8f;
+      --text-muted: #6b665c;
+      --accent-red: #8b1a1a;
+      --accent-green: #2d5a27;
+      --border: #2a2a32;
+      --border-gold: #3d3420;
+      --success: #3d7a35;
+      --warning: #a67c00;
+      --danger: #9b2c2c;
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Crimson Pro', serif;
+      --font-ui: 'Inter', sans-serif;
+      --radius: 6px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.55;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(201,162,39,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(139,26,26,0.05) 0%, transparent 40%);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, #0f0f12 0%, #0a0a0c 100%);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 12px 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--gold);
+      background: rgba(201,162,39,0.08);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lang-btn, .notif-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover, .notif-btn:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    .notif-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Main layout */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 60px);
+      padding-bottom: 70px;
+    }
+
+    .screen {
+      display: none;
+      padding: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(0deg, #0f0f12 0%, #121216 100%);
+      border-top: 1px solid var(--border-gold);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 12px;
+      z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--gold);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.5;
+    }
+
+    /* Typography helpers */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 12px;
+      height: 1px;
+      background: var(--gold-dim);
+    }
+
+    .flavor-text {
+      font-style: italic;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .card.gold-border {
+      border-color: var(--border-gold);
+    }
+
+    .card.decree {
+      border-left: 3px solid var(--gold);
+      background: linear-gradient(90deg, rgba(201,162,39,0.06) 0%, var(--bg-card) 40%);
+    }
+
+    /* Search */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px 12px 42px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: border-color: 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Brother meta */
+    .brother-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+    }
+
+    .brother-name {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    .brother-title {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .home-tongue {
+      background: rgba(201,162,39,0.12);
+      color: var(--gold);
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    /* Translation block */
+    .translation-block {
+      margin-top: 10px;
+    }
+
+    .translated-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .original-toggle {
+      margin-top: 10px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      user-select: none;
+    }
+
+    .original-toggle:hover {
+      color: var(--gold);
+    }
+
+    .original-text {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: var(--bg-deep);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .original-text.show {
+      display: block;
+    }
+
+    .confidence {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .stars {
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    /* Rule card */
+    .rule-number {
+      font-family: var(--font-display);
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .rule-speaks {
+      font-family: var(--font-display);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .rule-body {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .rule-explanation {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .rule-commentary {
+      font-style: italic;
+      font-size: 13px;
+      color: var(--gold-dim);
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 10px;
+    }
+
+    /* Council decree */
+    .decree-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(61,122,53,0.2);
+      color: #6bc45e;
+      border: 1px solid rgba(61,122,53,0.4);
+      letter-spacing: 0.04em;
+    }
+
+    .decree-question {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    .decree-answer {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    /* Lexicon */
+    .lexicon-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lex-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      font-family: var(--font-ui);
+      font-size: 13px;
+    }
+
+    .lex-normal {
+      color: var(--text-muted);
+    }
+
+    .lex-codex {
+      color: var(--gold);
+      font-weight: 500;
+      text-align: right;
+    }
+
+    /* Language modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-gold);
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      max-width: 480px;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 20px 16px 32px;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-ui);
+    }
+
+    .lang-option:hover, .lang-option.selected {
+      border-color: var(--gold-dim);
+      background: rgba(201,162,39,0.08);
+    }
+
+    .lang-option.selected {
+      color: var(--gold);
+    }
+
+    /* Toast / Chaos warning */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-elevated);
+      border: 1px solid var(--warning);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      max-width: 90%;
+      z-index: 150;
+      opacity: 0;
+      transition: all 0.3s;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Profile / Rank */
+    .rank-card {
+      text-align: center;
+      padding: 24px 16px;
+      background: linear-gradient(180deg, rgba(201,162,39,0.1) 0%, var(--bg-card) 60%);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+
+    .rank-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--gold-bright);
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .rank-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .rank-progress {
+      height: 4px;
+      background: var(--bg-deep);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 0 20px 8px;
+    }
+
+    .rank-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      width: 68%;
+    }
+
+    .rank-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Tags / chips */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      padding: 5px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip:hover, .chip.active {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(201,162,39,0.1);
+    }
+
+    /* Empty / helper */
+    .helper {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+    }
+
+    /* Button */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(180deg, #c9a227 0%, #8a7020 100%);
+      color: #0a0a0c;
+      border: none;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: filter 0.2s;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* Responsive */
+    @media (min-width: 600px) {
+      .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      .app-header, .bottom-nav {
+        max-width: 480px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+      }
+      .bottom-nav {
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">VR</div>
+      <div>
+        <div class="logo-text">The Vox Relay</div>
+        <div class="logo-sub">Brotherhood Codex</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="lang-btn" id="langBtn" onclick="openLangModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="currentLangLabel">English</span>
+      </button>
+      <button class="notif-btn" onclick="showToast('A new decree has been issued by Elder Brother Orion.')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge">2</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <!-- ========== HOME / CODEX ========== -->
+    <section class="screen active" id="screen-home">
+      <div class="section-title">The Codex</div>
+      <p class="flavor-text">"The wisdom of countless generations of Brothers, preserved for those who remain steadfast."</p>
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="search-input" placeholder="Consult the Codex..." id="searchInput" oninput="filterRules()" />
+      </div>
+
+      <div class="chip-row" id="topicChips">
+        <span class="chip active" data-topic="all">All</span>
+        <span class="chip" data-topic="loyalty">Loyalty</span>
+        <span class="chip" data-topic="discipline">Discipline</span>
+        <span class="chip" data-topic="brotherhood">Brotherhood</span>
+        <span class="chip" data-topic="gym">Gym</span>
+        <span class="chip" data-topic="relationships">Relationships</span>
+      </div>
+
+      <div id="rulesList">
+        <!-- Rules injected by JS -->
+      </div>
+    </section>
+
+    <!-- ========== HALL OF THE COUNCIL ========== -->
+    <section class="screen" id="screen-council">
+      <div class="section-title">Hall of the Council</div>
+      <p class="flavor-text">"Bring forth your trials. The Council shall deliberate and deliver judgment in accordance with the Codex."</p>
+
+      <button class="btn-primary" onclick="showToast('Petition submitted. The Council will deliberate.')">
+        Submit a Petition
+      </button>
+
+      <div style="margin-top: 24px;">
+        <div class="section-title">Recent Decrees</div>
+        <div id="decreesList">
+          <!-- Decrees injected -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LEXICON ========== -->
+    <section class="screen" id="screen-lexicon">
+      <div class="section-title">The Lexicon</div>
+      <p class="flavor-text">Brotherhood terminology. The Lexicon itself is translated while keeping the themed flavor consistent.</p>
+
+      <div class="lexicon-grid" id="lexiconList">
+        <!-- Injected -->
+      </div>
+    </section>
+
+    <!-- ========== ARCHIVES ========== -->
+    <section class="screen" id="screen-archives">
+      <div class="section-title">Imperial Archives</div>
+      <p class="flavor-text">Every Council answer is permanently searchable. The wisdom endures.</p>
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="search-input" placeholder="Search the Archives..." />
+      </div>
+
+      <div id="archivesList">
+        <!-- Same as decrees for prototype -->
+      </div>
+    </section>
+
+    <!-- ========== BROTHER (Profile) ========== -->
+    <section class="screen" id="screen-profile">
+      <div class="rank-card">
+        <div class="rank-title">Brother Atlas</div>
+        <div class="rank-sub">Veteran Brother · Home Tongue: <span id="profileLang">English</span></div>
+        <div class="rank-progress"><div class="rank-bar"></div></div>
+        <div class="rank-label">68% toward Shield Brother</div>
+      </div>
+
+      <div class="section-title">Your Standing</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;font-family:var(--font-ui);font-size:13px;margin-bottom:8px;">
+          <span style="color:var(--text-muted)">Petitions submitted</span>
+          <span style="color:var(--gold)">3</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--font-ui);font-size:13px;margin-bottom:8px;">
+          <span style="color:var(--text-muted)">Decrees cited</span>
+          <span style="color:var(--gold)">12</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--font-ui);font-size:13px;">
+          <span style="color:var(--text-muted)">Purity Seals earned</span>
+          <span style="color:var(--gold)">5</span>
+        </div>
+      </div>
+
+      <div class="section-title">Invoke the Vox Relay</div>
+      <div class="card">
+        <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
+          Choose your Home Tongue once. Every post, decree, and Codex rule will be rendered in your language automatically.
+        </p>
+        <button class="btn-primary" onclick="openLangModal()">Change Home Tongue</button>
+      </div>
+
+      <div class="section-title">Chaos Watch</div>
+      <div class="card" style="border-color:var(--warning);">
+        <p style="font-size:13px;color:var(--text-secondary);">
+          No active corruption detected. Continue walking in the Emperor's Light.
+        </p>
+        <button class="btn-ghost" style="margin-top:10px;" onclick="showToast('Minor Slaaneshi Corruption Detected: You have opened the Archives six times today. Touch grass, Brother.')">
+          Run Self-Audit
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-screen="home" onclick="switchScreen('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
+      Codex
+    </button>
+    <button class="nav-item" data-screen="council" onclick="switchScreen('council')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+      Council
+    </button>
+    <button class="nav-item" data-screen="lexicon" onclick="switchScreen('lexicon')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><circle cx="12" cy="12" r="2"/></svg>
+      Lexicon
+    </button>
+    <button class="nav-item" data-screen="archives" onclick="switchScreen('archives')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Archives
+    </button>
+    <button class="nav-item" data-screen="profile" onclick="switchScreen('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Brother
+    </button>
+  </nav>
+
+  <!-- Language Modal -->
+  <div class="modal-overlay" id="langModal" onclick="closeLangModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">Home Tongue</div>
+      <div class="modal-sub">Choose once. The Vox Relay will render all transmissions in your language.</div>
+      <div id="langOptions"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ========== DATA ==========
+    const languages = [
+      { code: 'en', name: 'English', native: 'English' },
+      { code: 'ja', name: 'Japanese', native: '日本語' },
+      { code: 'de', name: 'German', native: 'Deutsch' },
+      { code: 'es', name: 'Spanish', native: 'Español' },
+      { code: 'pt', name: 'Portuguese', native: 'Português' },
+      { code: 'fr', name: 'French', native: 'Français' },
+      { code: 'it', name: 'Italian', native: 'Italiano' },
+      { code: 'ko', name: 'Korean', native: '한국어' },
+      { code: 'zh', name: 'Mandarin', native: '中文' },
+      { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
+      { code: 'ar', name: 'Arabic', native: 'العربية' }
+    ];
+
+    let currentLang = 'en';
+
+    // Sample rules with multi-language content
+    const rules = [
+      {
+        id: 112,
+        topics: ['loyalty', 'brotherhood'],
+        translations: {
+          en: {
+            body: "A Brother does not abandon another Brother in his hour of need.",
+            explanation: "A Brother's strength is measured not only by victories, but by the burdens he willingly shares.",
+            commentary: "Stand with him. Not because he deserves it. Because that is what Brothers do."
+          },
+          ja: {
+            body: "兄弟は、兄弟が困っている時に見捨ててはならない。",
+            explanation: "兄弟の強さは勝利だけで測られるものではなく、喜んで共有する重荷によっても測られる。",
+            commentary: "彼と共に立て。彼がそれに値するからではない。それが兄弟のすることだからだ。"
+          },
+          de: {
+            body: "Ein Bruder verlässt einen anderen Bruder nicht in seiner Stunde der Not.",
+            explanation: "Die Stärke eines Bruders bemisst sich nicht nur an Siegen, sondern an den Lasten, die er bereitwillig teilt.",
+            commentary: "Stehe an seiner Seite. Nicht weil er es verdient. Sondern weil das ist, was Brüder tun."
+          },
+          es: {
+            body: "Un Hermano no abandona a otro Hermano en su hora de necesidad.",
+            explanation: "La fuerza de un Hermano se mide no solo por las victorias, sino por las cargas que comparte de buena gana.",
+            commentary: "Permanece a su lado. No porque lo merezca. Porque eso es lo que hacen los Hermanos."
+          },
+          pt: {
+            body: "Um Irmão não abandona outro Irmão na sua hora de necessidade.",
+            explanation: "A força de um Irmão não se mede apenas pelas vitórias, mas pelos fardos que ele compartilha de bom grado.",
+            commentary: "Fique ao lado dele. Não porque ele mereça. Porque é isso que os Irmãos fazem."
+          }
+        }
+      },
+      {
+        id: 287,
+        topics: ['brotherhood', 'relationships'],
+        translations: {
+          en: {
+            body: "Never allow a Brother to walk into avoidable embarrassment.",
+            explanation: "Warn him. Guide him. Laugh only after the danger has passed.",
+            commentary: "Loyalty includes protecting dignity when it still can be protected."
+          },
+          ja: {
+            body: "兄弟が避けられる恥をかくのを決して許してはならない。",
+            explanation: "警告せよ。導け。危険が去ってから笑え。",
+            commentary: "忠誠には、まだ守れるうちに尊厳を守ることも含まれる。"
+          },
+          de: {
+            body: "Erlaube einem Bruder niemals, in vermeidbare Peinlichkeit zu geraten.",
+            explanation: "Warne ihn. Führe ihn. Lache erst, wenn die Gefahr vorüber ist.",
+            commentary: "Loyalität schließt den Schutz der Würde ein, solange sie noch geschützt werden kann."
+          },
+          es: {
+            body: "Nunca permitas que un Hermano caiga en una vergüenza evitable.",
+            explanation: "Adviértele. Guíalo. Ríe solo después de que el peligro haya pasado.",
+            commentary: "La lealtad incluye proteger la dignidad mientras aún se pueda."
+          },
+          pt: {
+            body: "Nunca permita que um Irmão caia em um constrangimento evitável.",
+            explanation: "Avise-o. Guie-o. Ria apenas depois que o perigo tiver passado.",
+            commentary: "A lealdade inclui proteger a dignidade enquanto ainda for possível."
+          }
+        }
+      },
+      {
+        id: 414,
+        topics: ['loyalty', 'brotherhood'],
+        translations: {
+          en: {
+            body: "Never reveal a Brother's confidence without grave cause.",
+            explanation: "Trust, once broken, is rarely reforged.",
+            commentary: "The Codex holds silence as a form of strength."
+          },
+          ja: {
+            body: "重大な理由なく兄弟の秘密を明かしてはならない。",
+            explanation: "一度壊れた信頼は、ほとんど再び鍛え直されることはない。",
+            commentary: "コデックスは沈黙を力の一形態として保持する。"
+          },
+          de: {
+            body: "Enthülle niemals das Vertrauen eines Bruders ohne schwerwiegenden Grund.",
+            explanation: "Vertrauen, einmal gebrochen, wird selten neu geschmiedet.",
+            commentary: "Der Codex hält Schweigen für eine Form von Stärke."
+          },
+          es: {
+            body: "Nunca reveles la confianza de un Hermano sin causa grave.",
+            explanation: "La confianza, una vez rota, rara vez se vuelve a forjar.",
+            commentary: "El Códex sostiene el silencio como una forma de fuerza."
+          },
+          pt: {
+            body: "Nunca revele a confiança de um Irmão sem causa grave.",
+            explanation: "A confiança, uma vez quebrada, raramente é reforjada.",
+            commentary: "O Codex considera o silêncio uma forma de força."
+          }
+        }
+      },
+      {
+        id: 56,
+        topics: ['discipline', 'gym'],
+        translations: {
+          en: {
+            body: "Skipping leg day for six consecutive weeks requires investigation by the Council.",
+            explanation: "The body is the vessel of the Brother. Neglect is a form of slow heresy.",
+            commentary: "Touch grass. Then touch the squat rack."
+          },
+          ja: {
+            body: "6週間連続でレッグデイをサボることは、評議会による調査を必要とする。",
+            explanation: "身体は兄弟の器である。怠慢は緩やかな異端の一形態である。",
+            commentary: "草に触れよ。そしてスクワットラックに触れよ。"
+          },
+          de: {
+            body: "Sechs Wochen hintereinander Beintraining auszulassen erfordert eine Untersuchung durch den Rat.",
+            explanation: "Der Körper ist das Gefäß des Bruders. Vernachlässigung ist eine Form langsamer Häresie.",
+            commentary: "Berühre Gras. Dann berühre die Kniebeugenstange."
+          },
+          es: {
+            body: "Saltarse el día de piernas durante seis semanas consecutivas requiere investigación del Consejo.",
+            explanation: "El cuerpo es el recipiente del Hermano. El descuido es una forma de herejía lenta.",
+            commentary: "Toca hierba. Luego toca la barra de sentadillas."
+          },
+          pt: {
+            body: "Pular o dia de pernas por seis semanas consecutivas exige investigação do Conselho.",
+            explanation: "O corpo é o recipiente do Irmão. A negligência é uma forma de heresia lenta.",
+            commentary: "Toque a grama. Depois toque a barra de agachamento."
+          }
+        }
+      }
+    ];
+
+    // Sample decrees
+    const decrees = [
+      {
+        id: 1,
+        asker: "Brother Atlas",
+        title: "Veteran Brother",
+        homeTongue: "English",
+        original: {
+          en: "My closest brother has begun avoiding the gym and neglecting himself. How should I proceed?"
+        },
+        answer: {
+          en: "Do not mock your brother in his weakness. Stand beside him until he is strong enough to stand beside you once more.",
+          ja: "兄弟の弱さを嘲ってはならない。彼が再びあなたの隣に立てるほど強くなるまで、その隣に立て。",
+          de: "Verspotte deinen Bruder nicht in seiner Schwäche. Stehe an seiner Seite, bis er stark genug ist, wieder an deiner Seite zu stehen.",
+          es: "No te burles de tu hermano en su debilidad. Permanece a su lado hasta que sea lo suficientemente fuerte para estar a tu lado de nuevo.",
+          pt: "Não zombe do seu irmão em sua fraqueza. Fique ao lado dele até que ele esteja forte o suficiente para ficar ao seu lado novamente."
+        },
+        deliveredBy: "Elder Brother Orion",
+        status: "Codex Approved"
+      },
+      {
+        id: 2,
+        asker: "Brother Titan",
+        title: "Battle Brother",
+        homeTongue: "English",
+        original: {
+          en: "I've lost motivation to train."
+        },
+        answer: {
+          en: "Motivation is fleeting. Discipline is the Codex made flesh. Return to the basic rites: sleep, protein, progressive overload. The will returns to those who keep showing up.",
+          ja: "モチベーションは一時的なものである。規律こそが肉となったコデックスである。基本の儀式に戻れ：睡眠、タンパク質、漸進的過負荷。意志は現れ続ける者に戻ってくる。",
+          de: "Motivation ist flüchtig. Disziplin ist der Codex, der Fleisch geworden ist. Kehre zu den grundlegenden Riten zurück: Schlaf, Protein, progressive Überlastung. Der Wille kehrt zu denen zurück, die weiter erscheinen.",
+          es: "La motivación es fugaz. La disciplina es el Códex hecho carne. Vuelve a los ritos básicos: sueño, proteína, sobrecarga progresiva. La voluntad regresa a quienes siguen apareciendo.",
+          pt: "A motivação é passageira. A disciplina é o Codex feito carne. Volte aos ritos básicos: sono, proteína, sobrecarga progressiva. A vontade retorna àqueles que continuam aparecendo."
+        },
+        deliveredBy: "Council Brother Fenrir",
+        status: "Codex Approved"
+      },
+      {
+        id: 3,
+        asker: "Brother Kaiju",
+        title: "Recruit Brother",
+        homeTongue: "Japanese",
+        original: {
+          en: "My Brother has become distant. How should I approach him?",
+          ja: "我が兄弟が最近距離を置いています。どのように接するべきでしょうか。"
+        },
+        answer: {
+          en: "Distance is often a quiet cry for steadiness, not rejection. Approach with presence, not pressure. Offer the simple rites of Brotherhood: a shared meal, a quiet walk, an invitation without demand.",
+          ja: "距離はしばしば拒絶ではなく、安定を求める静かな叫びである。圧力ではなく存在をもって近づけ。兄弟の単純な儀式を捧げよ：共有の食事、静かな散歩、要求のない招待。",
+          de: "Distanz ist oft ein stiller Schrei nach Beständigkeit, nicht Ablehnung. Nähere dich mit Präsenz, nicht mit Druck. Biete die einfachen Riten der Bruderschaft an: eine gemeinsame Mahlzeit, einen ruhigen Spaziergang, eine Einladung ohne Forderung.",
+          es: "La distancia suele ser un grito silencioso de firmeza, no de rechazo. Acércate con presencia, no con presión. Ofrece los ritos simples de la Hermandad: una comida compartida, un paseo tranquilo, una invitación sin exigencias.",
+          pt: "A distância é muitas vezes um grito silencioso por firmeza, não rejeição. Aproxime-se com presença, não com pressão. Ofereça os ritos simples da Irmandade: uma refeição compartilhada, uma caminhada tranquila, um convite sem exigências."
+        },
+        deliveredBy: "Senior Brother Steel",
+        status: "Codex Approved"
+      }
+    ];
+
+    // Lexicon
+    const lexicon = [
+      { normal: "App", codex: "The Codex" },
+      { normal: "Rules", codex: "Decrees" },
+      { normal: "Search", codex: "Consult the Codex" },
+      { normal: "Notifications", codex: "Vox Transmissions" },
+      { normal: "Bookmark", codex: "Seal Within the Archives" },
+      { normal: "Moderator", codex: "Council Brother" },
+      { normal: "Admin", codex: "High Marshal" },
+      { normal: "Report", codex: "Issue a Purity Review" },
+      { normal: "Ban", codex: "Exiled from the Brotherhood" },
+      { normal: "Login", codex: "Enter the Fortress" },
+      { normal: "User", codex: "Brother" },
+      { normal: "FAQ", codex: "Librarium" },
+      { normal: "Community", codex: "The Brotherhood" },
+      { normal: "Q&A", codex: "Council Deliberation" },
+      { normal: "Updates", codex: "New Decrees" },
+      { normal: "Popular", codex: "Most Cited Scrolls" },
+      { normal: "Translate", codex: "Invoke the Vox Relay" },
+      { normal: "Language", codex: "Home Tongue" },
+      { normal: "Original Text", codex: "Original Vox Transmission" },
+      { normal: "Translated", codex: "Codex Translation" }
+    ];
+
+    // ========== RENDER FUNCTIONS ==========
+    function getTranslation(obj, lang) {
+      return obj[lang] || obj['en'] || Object.values(obj)[0];
+    }
+
+    function renderRules() {
+      const container = document.getElementById('rulesList');
+      const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+      const activeTopic = document.querySelector('.chip.active')?.dataset.topic || 'all';
+
+      let filtered = rules.filter(r => {
+        const t = getTranslation(r.translations, currentLang);
+        const matchesTopic = activeTopic === 'all' || r.topics.includes(activeTopic);
+        const matchesSearch = !query || t.body.toLowerCase().includes(query) || t.explanation.toLowerCase().includes(query) || String(r.id).includes(query);
+        return matchesTopic && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="helper">No decrees match your consultation.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(r => {
+        const t = getTranslation(r.translations, currentLang);
+        const original = getTranslation(r.translations, 'en');
+        return `
+          <div class="card gold-border">
+            <div class="rule-number">Rule ${r.id}</div>
+            <div class="rule-speaks">The Codex Speaks</div>
+            <div class="rule-body">${t.body}</div>
+            <div class="rule-explanation">${t.explanation}</div>
+            <div class="rule-commentary">${t.commentary}</div>
+            ${currentLang !== 'en' ? `
+              <div class="original-toggle" onclick="toggleOriginal(this)">
+                ▸ Original Vox Transmission
+              </div>
+              <div class="original-text">${original.body}</div>
+              <div class="confidence"><span class="stars">★★★★★</span> Translation Confidence: Very High</div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDecrees(containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = decrees.map(d => {
+        const answer = getTranslation(d.answer, currentLang);
+        const originalQ = getTranslation(d.original, currentLang === 'ja' && d.original.ja ? 'ja' : 'en');
+        return `
+          <div class="card decree">
+            <div class="decree-header">
+              <div class="brother-meta">
+                <span class="brother-name">${d.asker}</span>
+                <span class="brother-title">${d.title}</span>
+                <span class="home-tongue">${d.homeTongue}</span>
+              </div>
+              <span class="status-badge">✓ ${d.status}</span>
+            </div>
+            <div class="decree-question">"${originalQ}"</div>
+            <div class="decree-answer">${answer}</div>
+            <div style="margin-top:12px;font-family:var(--font-ui);font-size:12px;color:var(--text-muted);">
+              Delivered by ${d.deliveredBy}
+            </div>
+            ${currentLang !== 'en' ? `
+              <div class="original-toggle" onclick="toggleOriginal(this)">
+                ▸ Original Vox Transmission
+              </div>
+              <div class="original-text">${getTranslation(d.answer, 'en')}</div>
+              <div class="confidence"><span class="stars">★★★★★</span> Translation Confidence: Very High</div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLexicon() {
+      const container = document.getElementById('lexiconList');
+      container.innerHTML = lexicon.map(l => `
+        <div class="lex-item">
+          <span class="lex-normal">${l.normal}</span>
+          <span class="lex-codex">${l.codex}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderLangOptions() {
+      const container = document.getElementById('langOptions');
+      container.innerHTML = languages.map(l => `
+        <div class="lang-option ${l.code === currentLang ? 'selected' : ''}" onclick="setLanguage('${l.code}')">
+          <span>${l.name}</span>
+          <span style="color:var(--text-muted);font-size:12px;">${l.native}</span>
+        </div>
+      `).join('');
+    }
+
+    // ========== INTERACTIONS ==========
+    function switchScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.screen === name);
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function toggleOriginal(el) {
+      const orig = el.nextElementSibling;
+      orig.classList.toggle('show');
+      el.innerHTML = orig.classList.contains('show') ? '▾ Original Vox Transmission' : '▸ Original Vox Transmission';
+    }
+
+    function openLangModal() {
+      renderLangOptions();
+      document.getElementById('langModal').classList.add('show');
+    }
+
+    function closeLangModal(e) {
+      if (e.target === document.getElementById('langModal')) {
+        document.getElementById('langModal').classList.remove('show');
+      }
+    }
+
+    function setLanguage(code) {
+      currentLang = code;
+      const lang = languages.find(l => l.code === code);
+      document.getElementById('currentLangLabel').textContent = lang.name;
+      document.getElementById('profileLang').textContent = lang.name;
+      document.getElementById('langModal').classList.remove('show');
+      renderRules();
+      renderDecrees('decreesList');
+      renderDecrees('archivesList');
+      showToast(`Home Tongue set to ${lang.name}. The Vox Relay is active.`);
+    }
+
+    function filterRules() {
+      renderRules();
+    }
+
+    // Topic chips
+    document.getElementById('topicChips').addEventListener('click', (e) => {
+      if (e.target.classList.contains('chip')) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        renderRules();
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    // Init
+    renderRules();
+    renderDecrees('decreesList');
+    renderDecrees('archivesList');
+    renderLexicon();
+  </script>
+</body>
+</html>
